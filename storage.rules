@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /evidence/{operatorId}/{allPaths=**} {
+      allow read: if request.auth.token.role == "reviewer"
+                  || request.auth.uid == operatorId;
+      allow write: if request.auth.token.role == "operator"
+                   && request.auth.uid == operatorId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('application/pdf|image/jpeg|image/png');
+    }
+  }
+}
